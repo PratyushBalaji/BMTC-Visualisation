@@ -53,7 +53,7 @@ def search_route():
             print("Invalid selection. Try again.\n")
 
 # Get full route info and plot
-def plot_route(route_id):
+def plot_route(route_id, route_name):
     headers = {"lan": "en", "deviceType": "WEB"}
     body = {"routeid": route_id, "servicetypeid": 0}
     resp = requests.post(ROUTE_DETAILS_URL, headers=headers, json=body).json()
@@ -75,7 +75,7 @@ def plot_route(route_id):
         plt.scatter(*zip(*stop_leds), c='blue', label='Stops')
     if bus_leds:
         plt.scatter(*zip(*bus_leds), c='red', label='Buses')
-    plt.title(f"Route Stop Map on {WIDTH}x{HEIGHT} Grid")
+    plt.title(f"Route Map for {route_name} on {WIDTH}x{HEIGHT} Grid")
     plt.xlim(0, WIDTH)
     plt.ylim(0, HEIGHT)
     plt.gca().invert_yaxis()
@@ -83,9 +83,16 @@ def plot_route(route_id):
     plt.legend()
     plt.show()
 
-# --- Main Flow ---
-selected = search_route()
-if selected:
-    route_name, route_id = selected
-    print(f"\nFetching route map for: {route_name}")
-    plot_route(route_id)
+# --- Main Loop ---
+def main():
+    while True:
+        selected = search_route()
+        if selected is None:
+            print("Goodbye!")
+            break
+        route_name, route_id = selected
+        print(f"\nFetching route map for: {route_name}")
+        plot_route(route_id, route_name)
+
+if __name__ == "__main__":
+    main()
