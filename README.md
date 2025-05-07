@@ -18,3 +18,89 @@ My goal is to make this project as open and accessible as possible so that other
 This list will be updated as and when I add more features.
 
 Requirements are available in [requirements.txt](requirements.txt). You can install them directly using `pip3 install -r requirements.txt`
+
+## How to use
+
+Currently, the python program is just a test to view how the GPS coordinates of stops and buses will be normalised on differently sized LED grids. It follows a basic user input flow and outputs a map. Regardless, here's how you can use it.
+
+1. Run the file with `python3 LEDvis.py`
+2. Enter the bus route you want to visualise ("exit" to exit)
+   - This can even be partial text, as this step performs a search query
+3. Select one of the options from the list (0 to search again)
+4. View your matplotlib plot. Blue for stops, and red for buses
+5. Close the matplotlib plot and repeat steps 2-5 to view more
+
+Example flow : 
+
+```
+$ ls
+LEDvis.py  README.md  requirements.txt
+$ python3 LEDvis.py
+Enter bus route (or type 'exit'): 
+```
+`> MF-23E`
+```
+Matching routes:
+1. MF-23E
+2. MF-23E D45-JHMS
+3. MF-23E MSP-LGR
+0. Search again
+```
+```
+Select a route number:
+```
+`> 1`
+```
+Fetching route map for: MF-23E
+```
+![Map for MF-23E](https://github.com/user-attachments/assets/5583760d-0d34-4331-b432-d529b050cfca)
+```
+Enter bus route (or type 'exit'):
+```
+`> KIA-6`
+```
+Matching routes:
+1. KIA-6
+2. KIA-6A
+3. KIA-6W
+0. Search again
+```
+```
+Select a route number:
+```
+`> 2`
+```
+Fetching route map for: KIA-6A
+```
+![Map for KIA-6A](https://github.com/user-attachments/assets/308c9c00-0aaf-426b-92a5-9ebf7cece339)
+```
+Enter bus route (or type 'exit'):
+```
+`> abcdefghijkl`
+```
+No Records Found.
+
+Enter bus route (or type 'exit'):
+```
+`> MF-23E`
+```
+Matching routes:
+1. MF-23E
+2. MF-23E D45-JHMS
+3. MF-23E MSP-LGR
+0. Search again
+```
+```
+Select a route number:
+```
+`> 5`
+```
+Invalid selection. Try again.
+```
+```
+Enter bus route (or type 'exit'):
+```
+`> exit`
+```
+Goodbye!
+```
