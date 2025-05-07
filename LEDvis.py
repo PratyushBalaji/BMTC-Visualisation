@@ -6,13 +6,14 @@ SEARCH_ROUTE_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchRoute_v2
 ROUTE_DETAILS_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchByRouteDetails_v4"
 
 # Display resolution
-WIDTH = 128
-HEIGHT = 128
+WIDTH = 64
+HEIGHT = 64
 
-# Normalize function
-def normalize_coords(stops, width, height):
-    lats = [s['centerlat'] for s in stops]
-    lons = [s['centerlong'] for s in stops]
+# Normalize stops + buses together using shared bounding box
+def normalize_coords(stops, buses, width, height):
+    combined = stops + buses
+    lats = [s['centerlat'] for s in combined]
+    lons = [s['centerlong'] for s in combined]
     min_lat, max_lat = min(lats), max(lats)
     min_lon, max_lon = min(lons), max(lons)
 
@@ -21,7 +22,9 @@ def normalize_coords(stops, width, height):
         y = int((lat - min_lat) / (max_lat - min_lat) * (height - 1))
         return x, height - 1 - y  # flip y
 
-    return [normalize(s['centerlat'], s['centerlong']) for s in stops]
+    stop_coords = [normalize(s['centerlat'], s['centerlong']) for s in stops]
+    bus_coords = [normalize(s['centerlat'], s['centerlong']) for s in buses]
+    return stop_coords, bus_coords
 
 # Search for routes by text
 def search_route():
@@ -59,15 +62,16 @@ def plot_route(route_id, route_name):
     resp = requests.post(ROUTE_DETAILS_URL, headers=headers, json=body).json()
 
     up_stops = resp.get("up", {}).get("data", [])
-    buses = resp.get("up", {}).get("mapData", [])
+    up_buses = resp.get("up", {}).get("mapData", [])
+    down_buses = resp.get("down", {}).get("mapData", [])
+    all_buses = up_buses + down_buses
 
     if not up_stops:
         print("No stop data available.")
         return
 
-    # Normalize coordinates
-    stop_leds = normalize_coords(up_stops, WIDTH, HEIGHT)
-    bus_leds = normalize_coords(buses, WIDTH, HEIGHT) if buses else []
+    # Normalize both sets using shared bounding box
+    stop_leds, bus_leds = normalize_coords(up_stops, all_buses, WIDTH, HEIGHT)
 
     # Plot
     plt.figure(figsize=(6, 6))
