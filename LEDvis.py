@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 # --- Config ---
 SEARCH_ROUTE_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchRoute_v2"
 ROUTE_DETAILS_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchByRouteDetails_v4"
+WIDTH = 128
+HEIGHT = 128
+PADDING = 2  # Padding in LEDs from each edge
 
-# Display resolution
-WIDTH = 64
-HEIGHT = 64
-
-# Normalize stops + buses together using shared bounding box
-def normalize_coords(stops, buses, width, height):
+# Normalize using shared bounding box with padding
+def normalize_coords(stops, buses, width, height, pad=2):
     combined = stops + buses
     lats = [s['centerlat'] for s in combined]
     lons = [s['centerlong'] for s in combined]
@@ -18,15 +17,15 @@ def normalize_coords(stops, buses, width, height):
     min_lon, max_lon = min(lons), max(lons)
 
     def normalize(lat, lon):
-        x = int((lon - min_lon) / (max_lon - min_lon) * (width - 1))
-        y = int((lat - min_lat) / (max_lat - min_lat) * (height - 1))
-        return x, height - 1 - y  # flip y
+        x = int((lon - min_lon) / (max_lon - min_lon) * (width - 1 - 2 * pad)) + pad
+        y = int((lat - min_lat) / (max_lat - min_lat) * (height - 1 - 2 * pad)) + pad
+        return x, height - 1 - y  # Flip Y
 
     stop_coords = [normalize(s['centerlat'], s['centerlong']) for s in stops]
     bus_coords = [normalize(s['centerlat'], s['centerlong']) for s in buses]
     return stop_coords, bus_coords
 
-# Search for routes by text
+# Prompt user for route search
 def search_route():
     while True:
         user_input = input("Enter bus route (or type 'exit'): ").strip()
@@ -55,7 +54,7 @@ def search_route():
         except (ValueError, IndexError):
             print("Invalid selection. Try again.\n")
 
-# Get full route info and plot
+# Fetch route details and plot
 def plot_route(route_id, route_name):
     headers = {"lan": "en", "deviceType": "WEB"}
     body = {"routeid": route_id, "servicetypeid": 0}
@@ -70,10 +69,9 @@ def plot_route(route_id, route_name):
         print("No stop data available.")
         return
 
-    # Normalize both sets using shared bounding box
-    stop_leds, bus_leds = normalize_coords(up_stops, all_buses, WIDTH, HEIGHT)
+    stop_leds, bus_leds = normalize_coords(up_stops, all_buses, WIDTH, HEIGHT, PADDING)
 
-    # Plot
+    # Plotting
     plt.figure(figsize=(6, 6))
     if stop_leds:
         plt.scatter(*zip(*stop_leds), c='blue', label='Stops')
