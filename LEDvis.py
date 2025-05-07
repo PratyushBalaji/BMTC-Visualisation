@@ -6,11 +6,11 @@ SEARCH_ROUTE_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchRoute_v2
 ROUTE_DETAILS_URL = "https://bmtcmobileapi.karnataka.gov.in/WebAPI/SearchByRouteDetails_v4"
 WIDTH = 128
 HEIGHT = 128
-PADDING = 2  # Padding in LEDs from each edge
+PADDING = 2  # LED padding
 
-# Normalize using shared bounding box with padding
-def normalize_coords(stops, buses, width, height, pad=2):
-    combined = stops + buses
+# Normalize using shared bounding box + padding
+def normalize_coords(stops, up_buses, down_buses, width, height, pad=2):
+    combined = stops + up_buses + down_buses
     lats = [s['centerlat'] for s in combined]
     lons = [s['centerlong'] for s in combined]
     min_lat, max_lat = min(lats), max(lats)
@@ -22,8 +22,9 @@ def normalize_coords(stops, buses, width, height, pad=2):
         return x, height - 1 - y  # Flip Y
 
     stop_coords = [normalize(s['centerlat'], s['centerlong']) for s in stops]
-    bus_coords = [normalize(s['centerlat'], s['centerlong']) for s in buses]
-    return stop_coords, bus_coords
+    up_coords = [normalize(s['centerlat'], s['centerlong']) for s in up_buses]
+    down_coords = [normalize(s['centerlat'], s['centerlong']) for s in down_buses]
+    return stop_coords, up_coords, down_coords
 
 # Prompt user for route search
 def search_route():
@@ -63,20 +64,21 @@ def plot_route(route_id, route_name):
     up_stops = resp.get("up", {}).get("data", [])
     up_buses = resp.get("up", {}).get("mapData", [])
     down_buses = resp.get("down", {}).get("mapData", [])
-    all_buses = up_buses + down_buses
 
     if not up_stops:
         print("No stop data available.")
         return
 
-    stop_leds, bus_leds = normalize_coords(up_stops, all_buses, WIDTH, HEIGHT, PADDING)
+    stops, up_leds, down_leds = normalize_coords(up_stops, up_buses, down_buses, WIDTH, HEIGHT, PADDING)
 
     # Plotting
     plt.figure(figsize=(6, 6))
-    if stop_leds:
-        plt.scatter(*zip(*stop_leds), c='blue', label='Stops')
-    if bus_leds:
-        plt.scatter(*zip(*bus_leds), c='red', label='Buses')
+    if stops:
+        plt.scatter(*zip(*stops), c='blue', label='Stops')
+    if up_leds:
+        plt.scatter(*zip(*up_leds), c='red', label='Up Buses')
+    if down_leds:
+        plt.scatter(*zip(*down_leds), c='green', label='Down Buses')
     plt.title(f"Route Map for {route_name} on {WIDTH}x{HEIGHT} Grid")
     plt.xlim(0, WIDTH)
     plt.ylim(0, HEIGHT)
