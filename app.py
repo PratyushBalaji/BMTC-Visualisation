@@ -33,7 +33,7 @@ def render_map(center, stops, buses):
             [bus['centerlat'], bus['centerlong']],
             popup=(
                 f"Bus: {bus['vehiclenumber']}<br>"
-                f"ETA: {bus.get('eta', 'N/A')}<br>"
+                f"Last Updated: {bus.get('lastrefreshon', 'N/A')}<br>"
                 f"Service Type: {bus.get('servicetype', 'Unknown')}"
             ),
             icon=folium.Icon(color='red', icon='road', prefix='fa')
@@ -51,43 +51,49 @@ def main():
         st.session_state.stops = []
     if "buses" not in st.session_state:
         st.session_state.buses = []
-    if "map_state" not in st.session_state:
-        st.session_state.map_state = None
+    if "zoom" not in st.session_state:
+        st.session_state.zoom = 13
+    if "map_center" not in st.session_state:
+        st.session_state.map_center = None
+    if "ready" not in st.session_state:
+        st.session_state.ready = False
 
-    route_query = st.text_input("Enter bus route number", key="route_query")
-
-    if route_query:
-        suggestions = get_route_suggestions(route_query)
+    with st.form("route_form"):
+        route_query = st.text_input("Enter bus route number", key="route_query")
+        suggestions = get_route_suggestions(route_query) if route_query else []
         options = [f"{r['routeno']} (ID: {r['routeparentid']})" for r in suggestions]
         selected_option = st.selectbox("Matching Routes", options, key="route_select")
+        submitted = st.form_submit_button("Go!")
 
-        if st.button("Go!"):
-            index = options.index(selected_option)
-            selected_route = suggestions[index]
-            st.session_state.selected_route = selected_route
+    if submitted and selected_option:
+        index = options.index(selected_option)
+        selected_route = suggestions[index]
+        st.session_state.selected_route = selected_route
+        route_id = selected_route["routeparentid"]
+        stops, buses = get_route_data(route_id)
+        st.session_state.stops = stops
+        st.session_state.buses = buses
+        st.session_state.ready = True
+        if stops:
+            st.session_state.map_center = [stops[0]['centerlat'], stops[0]['centerlong']]
 
-            route_id = selected_route["routeparentid"]
-            stops, buses = get_route_data(route_id)
-            st.session_state.stops = stops
-            st.session_state.buses = buses
-
-    if st.session_state.stops:
+    if st.session_state.ready and st.session_state.stops:
         st.subheader(f"Map for Route: {st.session_state.selected_route['routeno']}")
-        center = [st.session_state.stops[0]['centerlat'], st.session_state.stops[0]['centerlong']]
 
-        map_obj = render_map(center, st.session_state.stops, st.session_state.buses)
+        map_obj = render_map(
+            st.session_state.map_center or [12.9716, 77.5946],
+            st.session_state.stops,
+            st.session_state.buses
+        )
 
-        map_data = st_folium(map_obj, key="bmtcmap", width=1200, height=700)
+        map_data = st_folium(map_obj, key="bmtcmap", width=1200, height=700, returned_objects=[])
 
-        if map_data and "center" in map_data:
-            st.session_state.zoom = map_data.get("zoom", 13)
-            st.session_state.map_center = [map_data["center"]["lat"], map_data["center"]["lng"]]
-
-        if st.button("🔄 Refresh Bus Positions"):
+        refresh = st.button("🔄 Refresh Bus Positions")
+        if refresh:
             route_id = st.session_state.selected_route["routeparentid"]
             _, buses = get_route_data(route_id)
             st.session_state.buses = buses
-            st.experimental_rerun()
+            st.session_state.ready = True
 
 if __name__ == "__main__":
     main()
