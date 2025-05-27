@@ -13,7 +13,7 @@ My goal is to make this project as open and accessible as possible so that other
 
 ## Disclaimer
 
-This project is intended **strictly** for **educational and informational purposes**. The data and API usage demonstrated here are meant solely to help understand how BMTC services function and retrieve data. Any use of this information in personal or public applications may place unintended load on BMTC servers and disrupt official services.
+This project is intended **strictly** for **educational and informational purposes**. The data and API usage demonstrated here and in related repositories are meant solely to help understand how BMTC services function and retrieve data. Any use of this information in personal or public applications may place unintended load on BMTC servers and disrupt official services.
 
 **I do not accept any responsibility or liability for consequences arising from the misuse of this data or API. Use at your own discretion and respect the intended limits of the service.**
 
