@@ -39,7 +39,7 @@ def render_map(center, stops, buses):
                 max_width=250
             ),
             tooltip=stop['stationname'],
-            icon=folium.Icon(color='blue', icon='bus', prefix='fa')
+            icon=folium.Icon(color='red', icon='circle', prefix='fa')
         ).add_to(m)
 
     for bus in buses:
@@ -50,7 +50,11 @@ def render_map(center, stops, buses):
                 f"Last Updated: {bus.get('lastrefreshon', 'N/A')}<br>"
                 f"Service Type: {bus.get('servicetype', 'Unknown')}"
             ),
-            icon=folium.Icon(color='red', icon='road', prefix='fa')
+            icon = folium.Icon(
+                color='blue' if bus.get('servicetype') == 'AC' else 'green',
+                icon='bus' if bus.get('servicetype') == 'AC' else 'bus-simple',
+                prefix='fa'
+            )
         ).add_to(m)
 
     return m
