@@ -7,19 +7,30 @@ This repository will be used to track all the scripts, instructions, and my over
 
 I'm using the publicly accessible BMTC API, that I am currently in the process of reverse-engineering and documenting. You can check that out at [this](https://github.com/PratyushBalaji/BMTC-API) GitHub repository.
 
-The final project will be an LED matrix with an LED controller and a processor (Likely a Raspberry Pi) which uses the internet to host a webserver where it will recieve instructions from the client, and make API calls to fetch relevant information, which it will then process to display on the LED matrix.
+The final project will be an LED matrix with an LED controller and a processor (Likely a Raspberry Pi) which uses the internet to host a webserver where it will receive instructions from the client, and make API calls to fetch relevant information, which it will then process to display on the LED matrix.
 
 My goal is to make this project as open and accessible as possible so that others can integrate it with their own hardware, or even modify to make work with other transit systems worldwide!
 
+> [!IMPORTANT]  
+> As of 2026, this project is currently stalled. Due to potential backend issues or other reasons, the API is no longer accessible (times out) on desktop and only works on the NammaBMTC mobile app.
+> 
+> I am looking into alternative ways to make the project work, such as using GTFS data to simulate movement instead of live positions, but unfortunately this is not a priority, and defeats the original purpose of the project.
+> 
+> The scripts in this repo were designed with a certain level of generality such that the core logic can be adapted for any other project. Feel free to fork or use this code!
+
 ## Disclaimer
 
-This project is intended **strictly** for **educational and informational purposes**. The data and API usage demonstrated here and in related repositories are meant solely to help understand how BMTC services function and retrieve data. Any use of this information in personal or public applications may place unintended load on BMTC servers and disrupt official services.
+This project is intended **strictly** for **educational and informational purposes**. The data and API usage demonstrated here and in related repositories are meant solely to help understand how BMTC services function and retrieve data. 
+
+Although the documented use of the API shown in this and any affiliated repositories is no different to manually loading the BMTC website, and does not constitute "API Hijacking", any use of this information in personal or public applications may place unintended load on BMTC servers and disrupt official services.
 
 **I do not accept any responsibility or liability for consequences arising from the misuse of this data or API. Use at your own discretion and respect the intended limits of the service.**
 
+**I do not own the rights to any data found by accessing these APIs, nor am I affiliated with the Bengaluru Metropolitan Transport Corporation.**
+
 ## Requirements
 - `requests` - To handle POST requests to the BMTC API
-- `matplotlib` - To visualise on the LED grid
+- `matplotlib` - To simulate / visualise on the LED grid
 
 This list will be updated as and when I add more features.
 
